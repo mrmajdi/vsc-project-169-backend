@@ -1,0 +1,50 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// Model representing a user of the application.
+model User {
+  id            Int      @id @default(autoincrement())
+  email         String   @unique
+  password      String
+  name          String?
+ // Posts authored by this user.
+ posts         Post[]   @relation("AuthorPosts")
+ // Comments authored by this user.
+ comments      Comment[] @relation("AuthorComments")
+ createdAt     DateTime @default(now())
+ updatedAt     DateTime @updatedAt
+}
+
+// Model representing a blog post.
+model Post {
+          id          Int      @id @default(autoincrement())
+          title       String
+          content     String
+          published   Boolean  @default(false)
+          authorId    Int
+ // Relation to the author (User).
+          author      User     @relation("AuthorPosts", fields: [authorId], references: [id])
+ // Comments associated with this post.
+          comments    Comment[] @relation("PostComments")
+          createdAt   DateTime @default(now())
+          updatedAt   DateTime @updatedAt
+}
+
+// Model representing a comment on a post.
+model Comment {
+        id        Int      @id @default(autoincrement())
+        content   String
+        postId    Int
+ // Relation to the post this comment belongs to.
+        post      Post     @relation("PostComments", fields: [postId], references: [id])
+        authorId  Int
+ // Relation to the user who authored this comment.
+        author    User     @relation("AuthorComments", fields: [authorId], references: [id])
+        createdAt DateTime @default(now())
+}
